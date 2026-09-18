@@ -71,7 +71,7 @@ export default function LoginPage() {
       display: 'flex',
       position: 'relative',
       overflow: 'hidden',
-      background: '#0a0118',
+      background: '#020005',
     }}>
 
       {/* ════ FULL BACKGROUND ════ */}
@@ -79,24 +79,24 @@ export default function LoginPage() {
         {/* Rich gradient base */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(135deg, #0a0118 0%, #1a0533 20%, #0d1b3e 40%, #0a0118 60%, #1a0533 80%, #0f0a2a 100%)',
+          background: 'linear-gradient(135deg, #020005 0%, #0a0118 40%, #050010 100%)',
         }} />
 
         {/* Vivid orbs — BIG and VISIBLE */}
         <div ref={orb1} style={{
-          position: 'absolute', width: 500, height: 500, top: '-5%', right: '-3%',
-          borderRadius: '50%', filter: 'blur(80px)',
-          background: 'radial-gradient(circle, rgba(124, 58, 237, 0.5) 0%, rgba(79, 70, 229, 0.2) 60%, transparent 80%)',
+          position: 'absolute', width: 600, height: 600, top: '-10%', right: '-5%',
+          borderRadius: '50%', filter: 'blur(100px)',
+          background: 'radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(79, 70, 229, 0.1) 50%, transparent 80%)',
         }} />
         <div ref={orb2} style={{
-          position: 'absolute', width: 450, height: 450, bottom: '-8%', left: '5%',
-          borderRadius: '50%', filter: 'blur(70px)',
-          background: 'radial-gradient(circle, rgba(236, 72, 153, 0.35) 0%, rgba(244, 63, 94, 0.15) 60%, transparent 80%)',
+          position: 'absolute', width: 500, height: 500, bottom: '-10%', left: '0%',
+          borderRadius: '50%', filter: 'blur(90px)',
+          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(147, 51, 234, 0.1) 50%, transparent 80%)',
         }} />
         <div ref={orb3} style={{
-          position: 'absolute', width: 350, height: 350, top: '35%', left: '30%',
-          borderRadius: '50%', filter: 'blur(60px)',
-          background: 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(14, 165, 233, 0.1) 60%, transparent 80%)',
+          position: 'absolute', width: 400, height: 400, top: '40%', left: '30%',
+          borderRadius: '50%', filter: 'blur(80px)',
+          background: 'radial-gradient(circle, rgba(14, 165, 233, 0.2) 0%, rgba(2, 132, 199, 0.05) 50%, transparent 80%)',
         }} />
 
         {/* Floating geometric shapes */}
@@ -167,15 +167,17 @@ export default function LoginPage() {
             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             style={{ fontFamily: 'var(--font-display)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 28 }}
           >
-            <span style={{ fontSize: 72, display: 'block', color: 'white' }}>Find the</span>
+            <span style={{ fontSize: 72, display: 'block', color: 'white', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>Find the</span>
             <span style={{
               fontSize: 72, display: 'block',
-              background: 'linear-gradient(135deg, #a78bfa 0%, #c084fc 30%, #f0abfc 60%, #f472b6 100%)',
+              background: 'linear-gradient(to right, #ffffff 0%, #a5b4fc 50%, #c084fc 100%)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+              textShadow: '0 0 30px rgba(165,180,252,0.3)',
+              paddingRight: 10,
             }}>
               Perfect Tutor
             </span>
-            <span style={{ fontSize: 72, display: 'block', color: 'white' }}>Near You</span>
+            <span style={{ fontSize: 72, display: 'block', color: 'white', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>Near You</span>
           </motion.h1>
 
           {/* Subtitle */}
@@ -207,12 +209,13 @@ export default function LoginPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.6 + i * 0.08, type: 'spring', stiffness: 300, damping: 20 }}
                 style={{
-                  padding: '8px 16px', borderRadius: 999,
-                  fontSize: 13, fontWeight: 500,
-                  color: 'rgba(255,255,255,0.7)',
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  backdropFilter: 'blur(10px)',
+                  padding: '8px 18px', borderRadius: 999,
+                  fontSize: 13, fontWeight: 600,
+                  color: 'rgba(255,255,255,0.9)',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 10px rgba(0,0,0,0.1)',
+                  backdropFilter: 'blur(12px)',
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                 }}
               >
@@ -239,8 +242,10 @@ export default function LoginPage() {
                     width: 38, height: 38, borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 16, marginLeft: i > 0 ? -8 : 0,
-                    background: 'rgba(255,255,255,0.08)',
-                    border: '2px solid #0a0118',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1.5px solid rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                   }}
                 >
                   {e}
@@ -338,10 +343,10 @@ export default function LoginPage() {
                     autoComplete="email"
                     style={{
                       width: '100%', padding: '14px 16px 14px 44px',
-                      fontSize: 15, borderRadius: 14,
+                      fontSize: 15, fontWeight: 600, borderRadius: 14,
                       border: `2px solid ${focusedField === 'email' ? '#6366f1' : '#e2e8f0'}`,
                       background: focusedField === 'email' ? '#faf5ff' : 'white',
-                      color: '#0f172a', outline: 'none',
+                      color: '#0f172a', outline: 'none', opacity: 1,
                       boxShadow: focusedField === 'email' ? '0 0 0 4px rgba(99,102,241,0.08)' : 'none',
                       transition: 'all 0.25s ease',
                     }}
@@ -376,10 +381,10 @@ export default function LoginPage() {
                     autoComplete="current-password"
                     style={{
                       width: '100%', padding: '14px 44px 14px 44px',
-                      fontSize: 15, borderRadius: 14,
+                      fontSize: 15, fontWeight: 600, borderRadius: 14,
                       border: `2px solid ${focusedField === 'pw' ? '#6366f1' : '#e2e8f0'}`,
                       background: focusedField === 'pw' ? '#faf5ff' : 'white',
-                      color: '#0f172a', outline: 'none',
+                      color: '#0f172a', outline: 'none', opacity: 1,
                       boxShadow: focusedField === 'pw' ? '0 0 0 4px rgba(99,102,241,0.08)' : 'none',
                       transition: 'all 0.25s ease',
                     }}

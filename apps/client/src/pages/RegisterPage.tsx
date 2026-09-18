@@ -44,20 +44,58 @@ const roles = [
   },
 ];
 
+// Reusable input component
+const Field = ({ id, label, icon, req = true, type = 'text', placeholder, value, onChange, error, note, inputMode, maxLength }: any) => {
+  const [isFocused, setIsFocused] = useState(false);
+  return (
+    <div>
+      <label htmlFor={id} style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6, letterSpacing: '0.02em' }}>
+        {label} {req && <span style={{ color: '#f43f5e' }}>*</span>}
+        {note && <span style={{ fontWeight: 400, color: '#94a3b8', marginLeft: 4, fontSize: 12 }}>{note}</span>}
+      </label>
+      <div style={{ position: 'relative' }}>
+        {icon && (
+          <div style={{
+            position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+            color: isFocused ? '#6366f1' : '#94a3b8', transition: 'color 0.2s',
+          }}>{icon}</div>
+        )}
+        <input
+          id={id} type={type} inputMode={inputMode} maxLength={maxLength}
+          placeholder={placeholder} value={value} onChange={onChange}
+          onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}
+          required={req}
+          style={{
+            width: '100%', padding: `13px 16px 13px ${icon ? '42px' : '14px'}`,
+            fontSize: 15, fontWeight: 600, borderRadius: 12,
+            border: `2px solid ${isFocused ? '#6366f1' : '#e2e8f0'}`,
+            background: isFocused ? '#faf5ff' : 'white',
+            color: '#0f172a', outline: 'none', opacity: 1,
+            boxShadow: isFocused ? '0 0 0 4px rgba(99,102,241,0.06)' : 'none',
+            transition: 'all 0.25s ease',
+          }}
+        />
+      </div>
+      {error && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{error}</p>}
+    </div>
+  );
+};
+
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { register, isLoading } = useAuthStore();
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [hoveredRole, setHoveredRole] = useState<string | null>(null);
   const shapeRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', phone: '',
     pincode: '', password: '', confirmPassword: '',
     role: '' as RoleOption | '',
+    location: undefined as { type: 'Point'; coordinates: [number, number] } | undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
   useEffect(() => {
     shapeRefs.current.forEach((el, i) => {
@@ -68,6 +106,31 @@ export default function RegisterPage() {
       });
     });
   }, []);
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    setIsFetchingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setFormData({
+          ...formData,
+          location: {
+            type: 'Point',
+            coordinates: [position.coords.longitude, position.coords.latitude],
+          },
+        });
+        toast.success('Live location captured successfully! 📍');
+        setIsFetchingLocation(false);
+      },
+      (error) => {
+        toast.error('Unable to retrieve your location. Please check browser permissions.');
+        setIsFetchingLocation(false);
+      }
+    );
+  };
 
   const validateStep1 = () => {
     if (!formData.role) { setErrors({ role: 'Please select your role' }); return false; }
@@ -99,6 +162,7 @@ export default function RegisterPage() {
         email: formData.email, phone: formData.phone || undefined,
         pincode: formData.pincode, password: formData.password,
         confirmPassword: formData.confirmPassword, role: formData.role as RoleOption,
+        location: formData.location,
       });
       toast.success('Welcome to TutorConnect! 🎉');
       navigate(getDashboardPath(useAuthStore.getState().user?.role || 'parent'));
@@ -116,48 +180,16 @@ export default function RegisterPage() {
 
   const selectedRole = roles.find(r => r.value === formData.role);
 
-  // Reusable input
-  const Field = ({ id, label, icon, req = true, type = 'text', placeholder, value, onChange, error, note, inputMode, maxLength }: any) => (
-    <div>
-      <label htmlFor={id} style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6, letterSpacing: '0.02em' }}>
-        {label} {req && <span style={{ color: '#f43f5e' }}>*</span>}
-        {note && <span style={{ fontWeight: 400, color: '#94a3b8', marginLeft: 4, fontSize: 12 }}>{note}</span>}
-      </label>
-      <div style={{ position: 'relative' }}>
-        {icon && (
-          <div style={{
-            position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-            color: focusedField === id ? '#6366f1' : '#94a3b8', transition: 'color 0.2s',
-          }}>{icon}</div>
-        )}
-        <input
-          id={id} type={type} inputMode={inputMode} maxLength={maxLength}
-          placeholder={placeholder} value={value} onChange={onChange}
-          onFocus={() => setFocusedField(id)} onBlur={() => setFocusedField(null)}
-          required={req}
-          style={{
-            width: '100%', padding: `13px 16px 13px ${icon ? '42px' : '14px'}`,
-            fontSize: 14, borderRadius: 12,
-            border: `2px solid ${focusedField === id ? '#6366f1' : '#e2e8f0'}`,
-            background: focusedField === id ? '#faf5ff' : 'white',
-            color: '#0f172a', outline: 'none',
-            boxShadow: focusedField === id ? '0 0 0 4px rgba(99,102,241,0.06)' : 'none',
-            transition: 'all 0.25s ease',
-          }}
-        />
-      </div>
-      {error && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{error}</p>}
-    </div>
-  );
+
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', position: 'relative', overflow: 'hidden', background: '#0a0118' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', position: 'relative', overflow: 'hidden', background: '#020005' }}>
       {/* Background */}
       <div style={{ position: 'absolute', inset: 0 }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #0a0118 0%, #1a0533 25%, #0d1b3e 50%, #1a0533 75%, #0a0118 100%)' }} />
-        <GradientBlob className="top-[-12%] left-[-8%]" color1="rgba(99,102,241,0.3)" color2="rgba(139,92,246,0.12)" size={550} speed={11} />
-        <GradientBlob className="bottom-[-10%] right-[-5%]" color1="rgba(236,72,153,0.2)" color2="rgba(244,63,94,0.08)" size={400} speed={13} />
-        <GradientBlob className="top-[45%] right-[20%]" color1="rgba(14,165,233,0.15)" color2="rgba(99,102,241,0.06)" size={300} speed={15} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #020005 0%, #0a0118 40%, #050010 100%)' }} />
+        <GradientBlob className="top-[-12%] left-[-8%]" color1="rgba(99,102,241,0.4)" color2="rgba(79,70,229,0.1)" size={600} speed={11} />
+        <GradientBlob className="bottom-[-10%] right-[-5%]" color1="rgba(168,85,247,0.3)" color2="rgba(147,51,234,0.1)" size={500} speed={13} />
+        <GradientBlob className="top-[45%] right-[20%]" color1="rgba(14,165,233,0.2)" color2="rgba(2,132,199,0.05)" size={400} speed={15} />
         {/* Shapes */}
         {[
           { t: '12%', l: '10%', s: 55, rot: 45, c: 'rgba(139,92,246,0.25)' },
@@ -193,9 +225,9 @@ export default function RegisterPage() {
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.7 }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.06, marginBottom: 24 }}>
-              <span style={{ fontSize: 64, display: 'block', color: 'white' }}>Join Our</span>
-              <span style={{ fontSize: 64, display: 'block', background: 'linear-gradient(135deg, #a78bfa, #c084fc, #f0abfc, #f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Learning</span>
-              <span style={{ fontSize: 64, display: 'block', color: 'white' }}>Community</span>
+              <span style={{ fontSize: 64, display: 'block', color: 'white', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>Join Our</span>
+              <span style={{ fontSize: 64, display: 'block', background: 'linear-gradient(to right, #ffffff 0%, #a5b4fc 50%, #c084fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: '0 0 30px rgba(165,180,252,0.3)', paddingRight: 10 }}>Learning</span>
+              <span style={{ fontSize: 64, display: 'block', color: 'white', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>Community</span>
             </h1>
           </motion.div>
 
@@ -215,11 +247,12 @@ export default function RegisterPage() {
               <motion.div key={s.l}
                 initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 + i * 0.1 }}
-                whileHover={{ scale: 1.04, borderColor: 'rgba(255,255,255,0.12)' }}
+                whileHover={{ scale: 1.04, borderColor: 'rgba(255,255,255,0.2)' }}
                 style={{
                   padding: '18px 20px', borderRadius: 16,
-                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
-                  backdropFilter: 'blur(8px)', cursor: 'default',
+                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 10px rgba(0,0,0,0.1)',
+                  backdropFilter: 'blur(12px)', cursor: 'default',
                   transition: 'border-color 0.3s',
                 }}>
                 <div style={{ fontSize: 18, marginBottom: 4 }}>{s.e}</div>
@@ -409,15 +442,44 @@ export default function RegisterPage() {
                   </div>
 
                   {/* Info */}
+                  {/* Location Info & Button */}
                   <div style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px',
+                    display: 'flex', flexDirection: 'column', gap: 8, padding: '12px',
                     borderRadius: 12, background: 'linear-gradient(135deg, rgba(99,102,241,0.04), rgba(139,92,246,0.04))',
                     border: '1px solid rgba(99,102,241,0.08)',
                   }}>
-                    <Zap size={13} style={{ color: '#6366f1', marginTop: 2, flexShrink: 0 }} />
-                    <p style={{ fontSize: 12, color: '#6366f1', lineHeight: 1.5 }}>
-                      Pincode matches you with nearby tutors. Google Maps location can be added later.
-                    </p>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <Zap size={13} style={{ color: '#6366f1', marginTop: 2, flexShrink: 0 }} />
+                      <p style={{ fontSize: 12, color: '#6366f1', lineHeight: 1.5, margin: 0 }}>
+                        {formData.role === 'tutor'
+                          ? 'Tutors with verified live locations get 3x more students. Add your exact location to stand out.'
+                          : 'Pincode matches you with nearby tutors. Exact location helps refine your search.'}
+                      </p>
+                    </div>
+                    <motion.button
+                      type="button"
+                      onClick={handleGetLocation}
+                      disabled={isFetchingLocation || !!formData.location}
+                      whileHover={formData.location ? {} : { scale: 1.02 }}
+                      whileTap={formData.location ? {} : { scale: 0.98 }}
+                      style={{
+                        padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                        color: formData.location ? '#10b981' : '#4f46e5',
+                        background: formData.location ? 'rgba(16,185,129,0.1)' : 'rgba(99,102,241,0.1)',
+                        border: `1px solid ${formData.location ? 'rgba(16,185,129,0.3)' : 'rgba(99,102,241,0.3)'}`,
+                        cursor: formData.location ? 'default' : 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                        width: '100%', marginTop: 4, transition: 'all 0.2s',
+                      }}
+                    >
+                      {isFetchingLocation ? (
+                        <><Loader2 size={14} className="animate-spin" /> Fetching GPS...</>
+                      ) : formData.location ? (
+                        <><CheckCircle2 size={14} /> Location Captured (Ready)</>
+                      ) : (
+                        <><MapPin size={14} /> Share Live Location</>
+                      )}
+                    </motion.button>
                   </div>
 
                   <Field id="pw" label="Password" icon={<Lock size={16} />} type={showPassword ? 'text' : 'password'} placeholder="Min 8 characters"

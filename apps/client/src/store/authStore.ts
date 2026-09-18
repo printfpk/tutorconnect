@@ -36,6 +36,7 @@ interface RegisterData {
   password: string;
   confirmPassword: string;
   role: 'parent' | 'student' | 'tutor';
+  location?: { type: 'Point'; coordinates: [number, number] };
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
