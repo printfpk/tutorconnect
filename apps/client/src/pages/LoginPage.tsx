@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { getDashboardPath } from '../components/ProtectedRoute';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { AnimatedInput } from '../components/AnimatedInput';
+import { AuthSidebar } from '../components/AuthSidebar';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
@@ -46,44 +47,18 @@ export default function LoginPage() {
       gap: '16px',
     }}>
       
-      {/* ═══ LEFT SIDE — IMAGE ═══ */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+      {/* ═══ LEFT SIDE — IMAGES/BRANDING ═══ */}
+      <div 
+        className="hidden lg:block"
         style={{
           width: '50%',
           height: 'calc(100vh - 32px)',
           position: 'sticky',
           top: '16px',
-          borderRadius: '40px',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
         }}
-        className="hidden lg:flex"
       >
-        <img 
-          src="https://images.unsplash.com/photo-1617802690992-15d93263d3a9?auto=format&fit=crop&w=1200&q=80" 
-          alt="VR Neon" 
-          style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
-        />
-        {/* Subtle overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 30%, rgba(0,0,0,0.2) 100%)' }} />
-        
-        {/* Logo */}
-        <div style={{ position: 'relative', zIndex: 10, marginTop: '40px' }}>
-          {/* Abstract geometric logo mimicking the UI design */}
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M24 8C15.1634 8 8 15.1634 8 24C8 32.8366 15.1634 40 24 40C32.8366 40 40 32.8366 40 24C40 15.1634 32.8366 8 24 8ZM24 36C17.3726 36 12 30.6274 12 24C12 17.3726 17.3726 12 24 12C30.6274 12 36 17.3726 36 24C36 30.6274 30.6274 36 24 36Z" fill="white"/>
-            <path d="M24 16C19.5817 16 16 19.5817 16 24C16 28.4183 19.5817 32 24 32C28.4183 32 32 28.4183 32 24C32 19.5817 28.4183 16 24 16ZM24 28C21.7909 28 20 26.2091 20 24C20 21.7909 21.7909 20 24 20C26.2091 20 28 21.7909 28 24C28 26.2091 26.2091 28 24 28Z" fill="white"/>
-            <path d="M30 18L18 30" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-            <path d="M18 18L30 30" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </div>
-      </motion.div>
+        <AuthSidebar />
+      </div>
 
       {/* ═══ RIGHT SIDE — FORM ═══ */}
       <div style={{
