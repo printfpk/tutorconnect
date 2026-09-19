@@ -7,6 +7,7 @@ import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ParentDashboard from './pages/dashboard/ParentDashboard';
 import TutorDashboard from './pages/dashboard/TutorDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
@@ -63,6 +64,14 @@ function AppContent() {
         element={
           <PublicOnlyRoute>
             <RegisterPage />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicOnlyRoute>
+            <ForgotPasswordPage />
           </PublicOnlyRoute>
         }
       />
