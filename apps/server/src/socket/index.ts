@@ -58,7 +58,36 @@ export function initializeSocket(httpServer: HttpServer): SocketServer {
       socket.broadcast.emit('user:offline', { userId: user.userId });
     });
 
-    // Chat events will be added in Phase 6
+    // Chat events
+    socket.on('send_message', async (data) => {
+      try {
+        const { chatId, content } = data;
+        const Chat = (await import('../models/Chat.js')).default;
+        const Message = (await import('../models/Message.js')).default;
+        
+        const chat = await Chat.findOne({ _id: chatId, participants: user.userId });
+        if (!chat) return; // Unauthorized or not found
+
+        const newMessage = await Message.create({
+          chatId,
+          senderId: user.userId,
+          content,
+          readBy: [user.userId]
+        });
+
+        await Chat.findByIdAndUpdate(chatId, { lastMessage: newMessage._id, updatedAt: new Date() });
+
+        const populatedMessage = await Message.findById(newMessage._id).populate('senderId', 'firstName lastName avatar').lean();
+
+        // Broadcast to all participants in the chat
+        chat.participants.forEach((participantId: string) => {
+          io.to(`user:${participantId.toString()}`).emit('new_message', populatedMessage);
+        });
+      } catch (error) {
+        logger.error('Error sending message:', error);
+      }
+    });
+
     // Flash events will be added in Phase 7
     // Tracking events will be added in Phase 8
   });

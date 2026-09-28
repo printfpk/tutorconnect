@@ -43,6 +43,48 @@ class AuthController {
   }
 
   /**
+   * POST /api/v1/auth/google
+   */
+  async googleLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { credential, role } = req.body;
+      if (!credential) {
+        throw new AppError('Google credential is required', 400, 'MISSING_CREDENTIAL');
+      }
+
+      const { user, tokens } = await authService.googleLogin(credential, role);
+
+      sendSuccess(res, {
+        user,
+        tokens,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/auth/facebook
+   */
+  async facebookLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { accessToken, role } = req.body;
+      if (!accessToken) {
+        throw new AppError('Facebook access token is required', 400, 'MISSING_CREDENTIAL');
+      }
+
+      const { user, tokens } = await authService.facebookLogin(accessToken, role);
+
+      sendSuccess(res, {
+        user,
+        tokens,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * POST /api/v1/auth/refresh
    */
   async refresh(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -115,6 +157,51 @@ class AuthController {
       }
       const user = await authService.updateProfile(req.userId, req.body);
       sendSuccess(res, { user });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/auth/forgot-password
+   */
+  async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email } = req.body;
+      if (!email) throw new AppError('Email is required', 400);
+      
+      await authService.forgotPassword(email);
+      sendSuccess(res, { message: 'If an account with that email exists, an OTP has been sent.' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/auth/verify-otp
+   */
+  async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email, otp } = req.body;
+      if (!email || !otp) throw new AppError('Email and OTP are required', 400);
+      
+      await authService.verifyOtp(email, otp);
+      sendSuccess(res, { message: 'OTP verified successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/auth/reset-password
+   */
+  async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email, otp, newPassword } = req.body;
+      if (!email || !otp || !newPassword) throw new AppError('Email, OTP, and new password are required', 400);
+      
+      await authService.resetPassword(email, otp, newPassword);
+      sendSuccess(res, { message: 'Password reset successfully' });
     } catch (error) {
       next(error);
     }

@@ -7,14 +7,59 @@ import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { AnimatedInput } from '../components/AnimatedInput';
 import { AuthSidebar } from '../components/AuthSidebar';
 import toast from 'react-hot-toast';
+import { useGoogleLogin } from '@react-oauth/google';
+import { FacebookLoginClient } from '@greatsumini/react-facebook-login';
+import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuthStore();
+  const { login, googleLogin: googleLoginStore, facebookLogin: facebookLoginStore, isLoading } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(true);
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      if (!agreed) {
+        toast.error('Please agree to the Terms & Conditions.');
+        return;
+      }
+      try {
+        await googleLoginStore(tokenResponse.access_token);
+        const user = useAuthStore.getState().user;
+        toast.success('Welcome back!');
+        navigate(getDashboardPath(user?.role || 'parent'));
+      } catch (error: any) {
+        toast.error(error.response?.data?.error?.message || 'Google Login failed.');
+      }
+    },
+    onError: () => {
+      toast.error('Google Login failed.');
+    }
+  });
+
+  const loginWithFacebook = () => {
+    if (!agreed) {
+      toast.error('Please agree to the Terms & Conditions.');
+      return;
+    }
+    FacebookLoginClient.init({ appId: import.meta.env.VITE_FACEBOOK_APP_ID || '', version: 'v16.0' });
+    FacebookLoginClient.login(async (response) => {
+      if (response.status === 'connected' && response.authResponse) {
+        try {
+          await facebookLoginStore(response.authResponse.accessToken);
+          const user = useAuthStore.getState().user;
+          toast.success('Welcome back!');
+          navigate(getDashboardPath(user?.role || 'parent'));
+        } catch (error: any) {
+          toast.error(error.response?.data?.error?.message || 'Facebook Login failed.');
+        }
+      } else {
+        toast.error('Facebook Login failed.');
+      }
+    }, { scope: 'public_profile,email' });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,6 +260,8 @@ export default function LoginPage() {
           {/* Social Buttons */}
           <motion.div variants={staggerItem} style={{ display: 'flex', gap: '16px' }}>
             <motion.button 
+              type="button"
+              onClick={() => loginWithGoogle()}
               whileHover={{ backgroundColor: '#f9fafb' }}
               whileTap={{ scale: 0.98 }}
               style={{ 
@@ -227,6 +274,8 @@ export default function LoginPage() {
             </motion.button>
 
             <motion.button 
+              type="button"
+              onClick={loginWithFacebook}
               whileHover={{ backgroundColor: '#f9fafb' }}
               whileTap={{ scale: 0.98 }}
               style={{ 

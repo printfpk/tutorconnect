@@ -21,6 +21,8 @@ interface AuthState {
 
   // Actions
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (credential: string, role?: string) => Promise<void>;
+  facebookLogin: (accessToken: string, role?: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
@@ -48,6 +50,38 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true });
     try {
       const response = await api.post('/auth/login', { email, password });
+      const { user, tokens } = response.data.data;
+
+      localStorage.setItem('accessToken', tokens.accessToken);
+      localStorage.setItem('refreshToken', tokens.refreshToken);
+
+      set({ user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  googleLogin: async (credential: string, role?: string) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post('/auth/google', { credential, role });
+      const { user, tokens } = response.data.data;
+
+      localStorage.setItem('accessToken', tokens.accessToken);
+      localStorage.setItem('refreshToken', tokens.refreshToken);
+
+      set({ user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  facebookLogin: async (accessToken: string, role?: string) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post('/auth/facebook', { accessToken, role });
       const { user, tokens } = response.data.data;
 
       localStorage.setItem('accessToken', tokens.accessToken);

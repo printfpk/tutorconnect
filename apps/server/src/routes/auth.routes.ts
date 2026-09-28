@@ -15,7 +15,12 @@ const router = Router();
 // Public routes
 router.post('/register', validate(registerSchema), authController.register);
 router.post('/login', validate(loginSchema), authController.login);
+router.post('/google', authController.googleLogin);
+router.post('/facebook', authController.facebookLogin);
 router.post('/refresh', validate(refreshTokenSchema), authController.refresh);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/verify-otp', authController.verifyOtp);
+router.post('/reset-password', authController.resetPassword);
 
 // Protected routes
 router.post('/logout', authenticate, authController.logout);

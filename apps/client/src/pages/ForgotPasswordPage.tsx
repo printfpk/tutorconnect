@@ -6,6 +6,7 @@ import { Eye, EyeOff, ArrowLeft, Loader2, Check } from 'lucide-react';
 import { AnimatedEye } from '../components/AnimatedEye';
 import { AuthSidebar } from '../components/AuthSidebar';
 import toast from 'react-hot-toast';
+import api from '../lib/api';
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -42,12 +43,15 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     if (!formData.email) return;
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setStep(2);
+    try {
+      await api.post('/auth/forgot-password', { email: formData.email });
       toast.success('Verification code sent to your email!');
-    }, 1000);
+      setStep(2);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error?.message || 'Failed to send verification code');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleVerifyCode = async (e: React.FormEvent) => {
@@ -58,12 +62,15 @@ export default function ForgotPasswordPage() {
       return;
     }
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setStep(3);
+    try {
+      await api.post('/auth/verify-otp', { email: formData.email, otp: code });
       toast.success('Code verified successfully!');
-    }, 1000);
+      setStep(3);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error?.message || 'Invalid or expired code');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -77,12 +84,16 @@ export default function ForgotPasswordPage() {
       return;
     }
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const code = `${formData.code1}${formData.code2}${formData.code3}${formData.code4}`;
+      await api.post('/auth/reset-password', { email: formData.email, otp: code, newPassword: formData.newPassword });
       toast.success('Password reset successfully! Please log in.');
       navigate('/login');
-    }, 1000);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error?.message || 'Failed to reset password');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {

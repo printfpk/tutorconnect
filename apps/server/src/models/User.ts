@@ -13,11 +13,15 @@ export interface IUser extends Document {
     type: 'Point';
     coordinates: [number, number]; // [longitude, latitude]
   };
-  password: string;
+  password?: string;
+  googleId?: string;
+  facebookId?: string;
   role: Role;
   status: UserStatus;
   avatar?: string;
   refreshToken?: string;
+  resetPasswordOtp?: string;
+  resetPasswordExpires?: Date;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -69,9 +73,18 @@ const userSchema = new Schema<IUser>(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
       minlength: [8, 'Password must be at least 8 characters'],
       select: false, // Don't return password by default
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true,
+    },
+    facebookId: {
+      type: String,
+      sparse: true,
+      unique: true,
     },
     role: {
       type: String,
@@ -88,6 +101,14 @@ const userSchema = new Schema<IUser>(
     },
     refreshToken: {
       type: String,
+      select: false,
+    },
+    resetPasswordOtp: {
+      type: String,
+      select: false,
+    },
+    resetPasswordExpires: {
+      type: Date,
       select: false,
     },
     lastLogin: {
@@ -118,7 +139,7 @@ userSchema.index({ createdAt: -1 });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) return next();
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -132,6 +153,7 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
+  if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 
